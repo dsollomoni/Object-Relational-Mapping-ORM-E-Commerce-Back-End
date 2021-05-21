@@ -6,58 +6,42 @@ const { Category, Product } = require("../../models");
 router.get("/", async (req, res) => {
   // find all categories
   // be sure to include its associated Products
-  const categories = await Product.findAll({
+  const categories = await Category.findAll({
     include: [
       {
-        model: Category,
+        model: Product,
         required: true,
       },
     ],
   });
-  let response = {};
-  categories.forEach((category) => {
-    if (response.hasOwnProperty(category.dataValues.category.category_name)) {
-      response[category.dataValues.category.category_name].push(
-        category.dataValues.product_name
-      );
-    } else {
-      let t = [];
-      t.push(category.dataValues.product_name);
-      response[category.dataValues.category.category_name] = t;
-    }
+  let response = categories.map((category) => {
+    let temp = {};
+    temp["id"] = category.dataValues.id;
+    temp["category_name"] = category.dataValues.category_name;
+    temp["products"] = category.dataValues.products;
+    return temp;
   });
-  console.log(response);
-  res.json(response).status(200);
+  res.send(response).status(200);
 });
 
 router.get("/:id", async (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
-  const categories = await Product.findAll({
+  const categories = await Category.findAll({
     include: [
       {
-        model: Category,
+        model: Product,
         required: true,
       },
     ],
-    where: {
-      category_id: req.params.id,
-    },
   });
+
   let response = {};
-  categories.forEach((category) => {
-    if (response.hasOwnProperty(category.dataValues.category.category_name)) {
-      response[category.dataValues.category.category_name].push(
-        category.dataValues.product_name
-      );
-    } else {
-      let t = [];
-      t.push(category.dataValues.product_name);
-      response[category.dataValues.category.category_name] = t;
-    }
-  });
-  console.log(response);
-  res.json(response).status(200);
+  response["id"] = categories[0].dataValues.id;
+  response["category_name"] = categories[0].dataValues.category_name;
+  response["products"] = categories[0].dataValues.products;
+
+  res.send(response).status(200);
 });
 
 router.post("/", async (req, res) => {
@@ -72,7 +56,7 @@ router.post("/", async (req, res) => {
     category_name: req.body.category_name,
   });
   if (new_category instanceof Category) {
-    res.send(`${req.body.category_name} was added!`).status(200);
+    res.send(new_category.dataValues).status(200);
   } else {
     res.status(500).send("Failed to add category");
   }
@@ -93,7 +77,7 @@ router.put("/:id", async (req, res) => {
     { where: { id: req.params.id } }
   );
   if (category[0]) {
-    res.status(200).send(`${req.params.id} has been updated`);
+    res.status(200).send(category);
   } else {
     res.status(500).send("Failed to update category.");
   }

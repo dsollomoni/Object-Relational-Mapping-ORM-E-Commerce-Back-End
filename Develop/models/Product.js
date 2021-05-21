@@ -13,8 +13,14 @@ Product.init(
       type: DataTypes.STRING,
       allowNull: false
     },
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     price: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.DECIMAL(10,2),
       allowNull: false
     },
     stock: {
@@ -24,7 +30,6 @@ Product.init(
     },
     category_id:{
       type: DataTypes.INTEGER,
-      allowNull: false
     }
   },
   {
